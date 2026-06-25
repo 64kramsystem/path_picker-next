@@ -24,6 +24,7 @@ versions which cannot be resolved.
 """
 
 CONTINUE_WARNING = "Are you sure you want to continue? Ctrl-C to quit"
+QUIET_COMMAND_PREFIX = "@quiet "
 
 
 # The two main entry points into this module:
@@ -35,11 +36,18 @@ def exec_composed_command(command: str, line_objs: List[LineMatch]) -> None:
         edit_files(line_objs)
         return
 
+    quiet = command.startswith(QUIET_COMMAND_PREFIX)
+    if quiet:
+        command = command[len(QUIET_COMMAND_PREFIX) :]
+
     logger.add_event("command_on_num_files", len(line_objs))
     command = compose_command(command, line_objs)
     append_alias_expansion()
     append_if_invalid(line_objs)
-    append_friendly_command(command)
+    if quiet:
+        append_to_file(command)
+    else:
+        append_friendly_command(command)
     append_exit()
 
 
