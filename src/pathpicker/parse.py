@@ -13,6 +13,8 @@ from pathpicker.repos import REPOS
 
 MatchResult = NewType("MatchResult", Tuple[str, int, Match])
 GIT_DIFF_PREFIXES = ("a/", "b/", "c/", "i/", "o/", "w/")
+COMMIT_HASH_REGEX = re.compile(r"(?<=^[+-] )([0-9a-f]{6,})( |$)")
+JUST_COMMIT_HASH_REGEX = re.compile(r"[0-9a-f]{6,}$")
 
 MASTER_REGEX = re.compile(
     r"(/?([a-z.A-Z0-9\-_]+/)+[@a-zA-Z0-9\-_+.]+\.[a-zA-Z0-9]{1,10})[:-]?(\d+)?"
@@ -146,6 +148,7 @@ class RegexConfig(NamedTuple):
 REGEX_WATERFALL: List[RegexConfig] = [
     # Homedirs need a separate regex.
     RegexConfig("HOMEDIR_REGEX", HOMEDIR_REGEX),
+    RegexConfig("COMMIT_HASH_REGEX", COMMIT_HASH_REGEX, no_num=True),
     # The master regex matches tbgs results with
     # line numbers, so we prefer that and test it first.
     RegexConfig(
@@ -297,6 +300,7 @@ def match_line(
         if (
             os.path.isfile(prepend_dir(file_path, with_file_inspection=True))
             or file_path[0:4] == ".../"
+            or JUST_COMMIT_HASH_REGEX.fullmatch(file_path)
         ):
             return result
     return None
@@ -380,6 +384,9 @@ def prepend_dir(file: str, with_file_inspection: bool = False) -> str:
 
     if first in REPOS + (os.environ.get("FPP_REPOS") or "").split(","):
         return os.path.expanduser("~/" + file)
+
+    if JUST_COMMIT_HASH_REGEX.fullmatch(file):
+        return file
 
     if "/" not in file:
         # assume current dir like ./

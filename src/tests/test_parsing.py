@@ -345,6 +345,24 @@ TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class TestParseFunction(unittest.TestCase):
+    def test_commit_hashes(self) -> None:
+        cases = [
+            ("+ f8c466e949 Subject", "f8c466e949"),
+            ("- d6409e7f92 Subject", "d6409e7f92"),
+            ("+ f8c466e949", "f8c466e949"),
+            ("f8c466e949 Subject", None),
+            (" + f8c466e949 Subject", None),
+            ("+ f8c46 Subject", None),
+            ("+ notahash Subject", None),
+        ]
+        for line, expected in cases:
+            for validate in (False, True):
+                result = parse.match_line(line, validate_file_exists=validate)
+                self.assertEqual(expected, result[0] if result else None)
+                if result:
+                    self.assertEqual(expected, result[2].group().strip())
+                    self.assertEqual(expected, parse.prepend_dir(result[0]))
+
     def test_git_diff_prefixes(self) -> None:
         for prefix in parse.GIT_DIFF_PREFIXES:
             path = "spec/scripts/rds_ri_coverage.bats"
