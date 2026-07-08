@@ -102,6 +102,11 @@ class LineMatch(LineBase):
         self.end -= trailing_whitespace
         self.group = self.group[0 : len(self.group) - trailing_whitespace]
 
+        git_prefix = path[:2]
+        if not all_input and git_prefix in parse.GIT_DIFF_PREFIXES and self.group.startswith(git_prefix):
+            self.start += 2
+            self.group = self.group[2:]
+
         self.selected = False
         self.hovered = False
         self.is_truncated = False

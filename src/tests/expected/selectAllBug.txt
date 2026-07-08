@@ -1,4 +1,4 @@
-=== diff --git |===>a/src/choose.py b/src/choose.py
+=== diff --git a/|===>src/choose.py b/src/choose.py
 /-\ index d184f91.|===>.5d7f2f9 100755
 \-/ --- a/src/choose.py
  .  +++ b/src/choose.py

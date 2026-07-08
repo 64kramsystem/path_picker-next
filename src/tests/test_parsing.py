@@ -345,6 +345,16 @@ TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class TestParseFunction(unittest.TestCase):
+    def test_git_diff_prefixes(self) -> None:
+        for prefix in parse.GIT_DIFF_PREFIXES:
+            path = "spec/scripts/rds_ri_coverage.bats"
+            self.assertEqual(parse.PREPEND_PATH + path, parse.prepend_dir(prefix + path))
+            line = "--- " + prefix + path
+            result = parse.match_line(line)
+            assert result is not None
+            match = LineMatch(FormattedText(line), result, 0)
+            self.assertEqual(path, line[match.start:match.end])
+
     def test_prepend_dir(self) -> None:
         for test_case in PREPEND_DIR_TEST_CASES:
             in_file = test_case["in"]

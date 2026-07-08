@@ -1,4 +1,4 @@
-=== diff --git |===>a/src/__tests__/screenTestRunner.py b/src/__tests__/screenT
+=== diff --git a/|===>src/__tests__/screenTestRunner.py b/src/__tests__/screenT
 /-\ index f1f6f7a..5c71551 100644
 |-| --- a/src/__tests__/screenTestRunner.py
 |-| +++ b/src/__tests__/screenTestRunner.py

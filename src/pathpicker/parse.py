@@ -12,6 +12,7 @@ from pathpicker import logger
 from pathpicker.repos import REPOS
 
 MatchResult = NewType("MatchResult", Tuple[str, int, Match])
+GIT_DIFF_PREFIXES = ("a/", "b/", "c/", "i/", "o/", "w/")
 
 MASTER_REGEX = re.compile(
     r"(/?([a-z.A-Z0-9\-_]+/)+[@a-zA-Z0-9\-_+.]+\.[a-zA-Z0-9]{1,10})[:-]?(\d+)?"
@@ -386,7 +387,7 @@ def prepend_dir(file: str, with_file_inspection: bool = False) -> str:
 
     # git show and diff has a/stuff and b/stuff, so handle that. git
     # status never does this so we don't need to worry about relative dirs
-    if file[0:2] == "a/" or file[0:2] == "b/":
+    if file[0:2] in GIT_DIFF_PREFIXES:
         return PREPEND_PATH + file[2:]
 
     split_up = file.split("/")
