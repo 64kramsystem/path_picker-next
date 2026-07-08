@@ -8,12 +8,16 @@ from typing import Dict, List, Optional, Tuple
 import choose
 import process_input
 from pathpicker.line_format import LineBase
+from pathpicker import parse
 from pathpicker.screen_flags import ScreenFlags
 from tests.lib.curses_api import CursesForTest
 from tests.lib.key_bindings import KEY_BINDINGS_FOR_TEST
 from tests.lib.screen import ScreenForTest
 
 INPUT_DIR = "./inputs/"
+TEST_PREPEND_PATH = os.path.abspath(
+    os.path.join(os.path.dirname(parse.__file__), "..", "..")
+) + "/"
 
 
 def get_line_objs_from_file(
@@ -23,9 +27,14 @@ def get_line_objs_from_file(
     file = open(input_file)
     lines = file.read().split("\n")
     file.close()
-    return process_input.get_line_objs_from_lines(
-        lines, validate_file_exists=validate_file_exists, all_input=all_input
-    )
+    original_prepend_path = parse.PREPEND_PATH
+    parse.PREPEND_PATH = TEST_PREPEND_PATH
+    try:
+        return process_input.get_line_objs_from_lines(
+            lines, validate_file_exists=validate_file_exists, all_input=all_input
+        )
+    finally:
+        parse.PREPEND_PATH = original_prepend_path
 
 
 def get_rows_from_screen_run(
