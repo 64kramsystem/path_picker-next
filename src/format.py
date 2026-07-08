@@ -82,6 +82,14 @@ class LineMatch(object):
         self.end -= trailingWhitespace
         self.group = self.group[0:len(self.group) - trailingWhitespace]
 
+        # git diff prefixes (a/, c/, ...) are stripped from the resolved
+        # path, so exclude them from the highlighted region as well
+        gitPrefix = self.originalPath[0:2]
+        if not allInput and gitPrefix in parse.GIT_DIFF_PREFIXES and \
+                self.group.startswith(gitPrefix):
+            self.start += 2
+            self.group = self.group[2:]
+
         self.selected = False
         self.hovered = False
         self.isTruncated = False

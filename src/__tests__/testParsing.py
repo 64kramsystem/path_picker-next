@@ -371,6 +371,20 @@ prependDirTestCases = [
         'in': 'b/foo/bar/baz/asd.py',
         'out': parse.PREPEND_PATH + 'foo/bar/baz/asd.py'
     }, {
+        # git mnemonic prefixes (diff.mnemonicPrefix): commit, index,
+        # object, worktree
+        'in': 'c/foo/bar/baz/asd.py',
+        'out': parse.PREPEND_PATH + 'foo/bar/baz/asd.py'
+    }, {
+        'in': 'i/foo/bar/baz/asd.py',
+        'out': parse.PREPEND_PATH + 'foo/bar/baz/asd.py'
+    }, {
+        'in': 'o/foo/bar/baz/asd.py',
+        'out': parse.PREPEND_PATH + 'foo/bar/baz/asd.py'
+    }, {
+        'in': 'w/foo/bar/baz/asd.py',
+        'out': parse.PREPEND_PATH + 'foo/bar/baz/asd.py'
+    }, {
         'in': '',
         'out': ''
     }]
@@ -442,6 +456,17 @@ class TestParseFunction(unittest.TestCase):
                     thisCase['input'] = testInput
                     self.checkFileResult(thisCase)
         print('Tested %d cases for file fuzz.' % len(fileTestCases))
+
+    def testGitDiffPrefixHighlight(self):
+        # the +/- markers and git diff prefixes (a/, c/, ...) are stripped
+        # from the copied path, so they must not be highlighted either
+        line = '--- c/spec/scripts/rds_ri_coverage.bats'
+        result = parse.matchLine(line)
+        lineObj = format.LineMatch(FormattedText(line), result, 0)
+        self.assertEqual(
+            'spec/scripts/rds_ri_coverage.bats',
+            line[lineObj.start:lineObj.end])
+        print('Tested git diff prefix highlight.')
 
     def testUnresolvable(self):
         fileLine = ".../something/foo.py"

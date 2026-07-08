@@ -25,13 +25,13 @@
  .  +            self.printUpTo(self.endingClearText, printer, y, *soFar)
      RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR      
  .  diff --git a/src/formattedText.py b/src/formattedText.py
-     WWWWWWWWWWW**********************WWWWWWWWWWWWWWWWWWWWWWW                   
+     WWWWWWWWWWWWW********************WWWWWWWWWWWWWWWWWWWWWWW                   
  .  index f02d1ca..e495352 100644
      WWWWWWWWWWWWWW________WWWWWWW                                              
  .  --- a/src/formattedText.py
-     WWWW______________________                                                 
+     WWWWWW____________________                                                 
  .  +++ b/src/formattedText.py
-     WWWW______________________                                                 
+     WWWWWW____________________                                                 
  .  @@ -23,6 +23,9 @@ class FormattedText(object):
      GGGGGGGGGGGGGGGGG                                                          
  .       FOREGROUND_RANGE = Range(30, 39)

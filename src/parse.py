@@ -10,6 +10,10 @@ import subprocess
 import logger
 from repos import REPOS
 
+# prefixes git show and diff prepend to paths: a/ and b/ by default, or c/, i/,
+# o/, w/ when diff.mnemonicPrefix is set
+GIT_DIFF_PREFIXES = ['a/', 'b/', 'c/', 'i/', 'o/', 'w/']
+
 MASTER_REGEX = re.compile(
     r'(\/?([a-z.A-Z0-9\-_]+\/)+[+@a-zA-Z0-9\-_+.]+\.[a-zA-Z0-9]{1,10})[:-]{0,1}(\d+)?')
 MASTER_REGEX_MORE_EXTENSIONS = re.compile(
@@ -339,9 +343,10 @@ def prependDir(file, withFileInspection=False):
         # assume current dir like ./
         return './' + file
 
-    # git show and diff has a/stuff and b/stuff, so handle that. git
-    # status never does this so we dont need to worry about relative dirs
-    if file[0:2] == 'a/' or file[0:2] == 'b/':
+    # git show and diff prefix paths with a/ and b/ (or c/, i/, o/, w/ when
+    # diff.mnemonicPrefix is set), so handle that. git status never does this
+    # so we dont need to worry about relative dirs
+    if file[0:2] in GIT_DIFF_PREFIXES:
         return PREPEND_PATH + file[2:]
 
     splitUp = file.split('/')
