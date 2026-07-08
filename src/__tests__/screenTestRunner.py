@@ -16,8 +16,15 @@ from screenForTest import ScreenForTest
 from screenFlags import ScreenFlags
 import processInput
 import choose
+import parse
 
 INPUT_DIR = './inputs/'
+
+# File-existence validation resolves relative paths against the enclosing git repo's root,
+# which is not necessarily the PathPicker root; pin it so tests don't depend on the checkout
+# location.
+TEST_PREPEND_PATH = os.path.abspath(
+    os.path.join(os.path.dirname(parse.__file__), '..')) + '/'
 
 
 def getLineObjsFromFile(inputFile, validateFileExists, allInput):
@@ -25,9 +32,14 @@ def getLineObjsFromFile(inputFile, validateFileExists, allInput):
     file = open(inputFile)
     lines = file.read().split('\n')
     file.close()
-    return processInput.getLineObjsFromLines(lines,
-                                             validateFileExists=validateFileExists,
-                                             allInput=allInput)
+    origPrependPath = parse.PREPEND_PATH
+    parse.PREPEND_PATH = TEST_PREPEND_PATH
+    try:
+        return processInput.getLineObjsFromLines(lines,
+                                                 validateFileExists=validateFileExists,
+                                                 allInput=allInput)
+    finally:
+        parse.PREPEND_PATH = origPrependPath
 
 
 def getRowsFromScreenRun(
