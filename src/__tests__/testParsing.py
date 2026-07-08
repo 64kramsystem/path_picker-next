@@ -385,6 +385,10 @@ prependDirTestCases = [
         'in': 'w/foo/bar/baz/asd.py',
         'out': parse.PREPEND_PATH + 'foo/bar/baz/asd.py'
     }, {
+        # commit hashes must be passed through untouched
+        'in': 'f8c466e949',
+        'out': 'f8c466e949'
+    }, {
         'in': '',
         'out': ''
     }]
@@ -425,6 +429,35 @@ allInputTestCases = [
         'match': 'no changes added to commit (use "git add" and/or "git commit -a")'
     }]
 
+commitHashTestCases = [
+    {
+        'input': '+ f8c466e949 Add deploy_requests DynamoDB table',
+        'match': 'f8c466e949'
+    }, {
+        'input': '- d6409e7f92 operations: add the deploy poller (systemd timer + Ruby script)',
+        'match': 'd6409e7f92'
+    }, {
+        # git cherry without -v: no subject after the hash
+        'input': '+ f8c466e949',
+        'match': 'f8c466e949'
+    }, {
+        # no +/- marker
+        'input': 'f8c466e949 Add deploy_requests DynamoDB table',
+        'match': None
+    }, {
+        # marker not at line start
+        'input': ' + f8c466e949 Add deploy_requests DynamoDB table',
+        'match': None
+    }, {
+        # too short
+        'input': '+ f8c46 Add deploy_requests DynamoDB table',
+        'match': None
+    }, {
+        # not hex
+        'input': '+ notahash Add deploy_requests DynamoDB table',
+        'match': None
+    }]
+
 
 class TestParseFunction(unittest.TestCase):
 
@@ -456,6 +489,25 @@ class TestParseFunction(unittest.TestCase):
                     thisCase['input'] = testInput
                     self.checkFileResult(thisCase)
         print('Tested %d cases for file fuzz.' % len(fileTestCases))
+
+    def testMatchCommitHash(self):
+        for testCase in commitHashTestCases:
+            for validate in [False, True]:
+                result = parse.matchLine(
+                    testCase['input'], validateFileExists=validate)
+                match = result[0] if result else None
+                self.assertEqual(
+                    testCase['match'], match,
+                    'Expected %s to match %s (validate=%s), got %s' % (
+                        testCase['input'], testCase['match'], validate, match))
+                if match:
+                    # the match region (used for highlighting) must cover the
+                    # hash only, not the +/- marker
+                    self.assertEqual(
+                        match, result[2].group().strip(),
+                        'Highlight for %s should cover only the hash' %
+                        testCase['input'])
+        print('Tested %d commit hash cases.' % len(commitHashTestCases))
 
     def testGitDiffPrefixHighlight(self):
         # the +/- markers and git diff prefixes (a/, c/, ...) are stripped

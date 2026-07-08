@@ -14,6 +14,11 @@ from repos import REPOS
 # o/, w/ when diff.mnemonicPrefix is set
 GIT_DIFF_PREFIXES = ['a/', 'b/', 'c/', 'i/', 'o/', 'w/']
 
+# commit hash in `git cherry (-v)`-style output, like `+ f8c466e949 Subject`
+COMMIT_HASH_REGEX = re.compile(
+    r'(?<=^[+-] )([0-9a-f]{6,})( |$)')
+JUST_COMMIT_HASH_REGEX = re.compile(
+    r'[0-9a-f]{6,}$')
 MASTER_REGEX = re.compile(
     r'(\/?([a-z.A-Z0-9\-_]+\/)+[+@a-zA-Z0-9\-_+.]+\.[a-zA-Z0-9]{1,10})[:-]{0,1}(\d+)?')
 MASTER_REGEX_MORE_EXTENSIONS = re.compile(
@@ -129,6 +134,10 @@ REGEX_WATERFALL = [{
     # Homedirs need a separate regex.
     'regex': HOMEDIR_REGEX,
     'name': 'HOMEDIR_REGEX',
+}, {
+    'regex': COMMIT_HASH_REGEX,
+    'name': 'COMMIT_HASH_REGEX',
+    'noNum': True,
 }, {
     # the master regex matches tbgs results with
     # line numbers, so we prefer that and test it first
@@ -261,7 +270,8 @@ def matchLine(line, validateFileExists=False, allInput=False):
     for result in results:
         (filePath, _, _) = result
         if os.path.isfile(prependDir(filePath, withFileInspection=True)) or \
-           filePath[0:4] == '.../':
+           filePath[0:4] == '.../' or \
+           JUST_COMMIT_HASH_REGEX.fullmatch(filePath):
             return result
     return None
 
@@ -338,6 +348,10 @@ def prependDir(file, withFileInspection=False):
 
     if first in REPOS:
         return os.path.expanduser('~/' + file)
+
+    if JUST_COMMIT_HASH_REGEX.fullmatch(file):
+        # commit hashes are not paths, so leave them untouched
+        return file
 
     if '/' not in file:
         # assume current dir like ./
