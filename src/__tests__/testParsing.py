@@ -441,8 +441,14 @@ commitHashTestCases = [
         'input': '+ f8c466e949',
         'match': 'f8c466e949'
     }, {
-        # no +/- marker
-        'input': 'f8c466e949 Add deploy_requests DynamoDB table',
+        'input': 'fd466f6c Set .env INTERNAL_AUTH_GROUP_GATE_ENABLED for all the other stacks',
+        'match': 'fd466f6c'
+    }, {
+        'input': 'f8c466e949',
+        'match': 'f8c466e949'
+    }, {
+        # unprefixed hash not at line start
+        'input': ' f8c466e949 Add deploy_requests DynamoDB table',
         'match': None
     }, {
         # marker not at line start

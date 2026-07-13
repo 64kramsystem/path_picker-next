@@ -17,6 +17,8 @@ GIT_DIFF_PREFIXES = ['a/', 'b/', 'c/', 'i/', 'o/', 'w/']
 # commit hash in `git cherry (-v)`-style output, like `+ f8c466e949 Subject`
 COMMIT_HASH_REGEX = re.compile(
     r'(?<=^[+-] )([0-9a-f]{6,})( |$)')
+UNPREFIXED_COMMIT_HASH_REGEX = re.compile(
+    r'^([0-9a-f]{6,})( |$)')
 JUST_COMMIT_HASH_REGEX = re.compile(
     r'[0-9a-f]{6,}$')
 MASTER_REGEX = re.compile(
@@ -137,6 +139,10 @@ REGEX_WATERFALL = [{
 }, {
     'regex': COMMIT_HASH_REGEX,
     'name': 'COMMIT_HASH_REGEX',
+    'noNum': True,
+}, {
+    'regex': UNPREFIXED_COMMIT_HASH_REGEX,
+    'name': 'UNPREFIXED_COMMIT_HASH_REGEX',
     'noNum': True,
 }, {
     # the master regex matches tbgs results with
