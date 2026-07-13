@@ -14,6 +14,7 @@ from pathpicker.repos import REPOS
 MatchResult = NewType("MatchResult", Tuple[str, int, Match])
 GIT_DIFF_PREFIXES = ("a/", "b/", "c/", "i/", "o/", "w/")
 COMMIT_HASH_REGEX = re.compile(r"(?<=^[+-] )([0-9a-f]{6,})( |$)")
+UNPREFIXED_COMMIT_HASH_REGEX = re.compile(r"^([0-9a-f]{6,})( |$)")
 JUST_COMMIT_HASH_REGEX = re.compile(r"[0-9a-f]{6,}$")
 
 MASTER_REGEX = re.compile(
@@ -149,6 +150,7 @@ REGEX_WATERFALL: List[RegexConfig] = [
     # Homedirs need a separate regex.
     RegexConfig("HOMEDIR_REGEX", HOMEDIR_REGEX),
     RegexConfig("COMMIT_HASH_REGEX", COMMIT_HASH_REGEX, no_num=True),
+    RegexConfig("UNPREFIXED_COMMIT_HASH_REGEX", UNPREFIXED_COMMIT_HASH_REGEX, no_num=True),
     # The master regex matches tbgs results with
     # line numbers, so we prefer that and test it first.
     RegexConfig(
