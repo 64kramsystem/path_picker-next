@@ -9,12 +9,21 @@ sys.path.insert(0, '../')
 from keyBindingsForTest import KEY_BINDINGS_FOR_TEST_CONFIG_CONTENT
 from keyBindingsForTest import KeyBindingsForTest
 from keyBindings import KeyBindings
+import os
 import tempfile
 import keyBindings
 import unittest
 
 
 class TestKeyBindingsParser(unittest.TestCase):
+
+    def testDefaultFileIsInXdgConfigDir(self):
+        expectedDir = os.environ.get('XDG_CONFIG_HOME') or '~/.config'
+
+        self.assertEqual(
+            keyBindings.KEY_BINDINGS_FILE,
+            os.path.join(expectedDir, 'fpp', '.fpp.keys')
+        )
 
     def testIgnoreNonExistingConfigurationFile(self):
         file = tempfile.NamedTemporaryFile(delete=True)

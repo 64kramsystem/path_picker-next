@@ -13,9 +13,8 @@ else:
     parserModule = configparser
 
 
-from stateFiles import FPP_DIR
-
-KEY_BINDINGS_FILE = os.path.join(FPP_DIR, '.fpp.keys')
+CONFIG_DIR = os.environ.get('XDG_CONFIG_HOME') or '~/.config'
+KEY_BINDINGS_FILE = os.path.join(CONFIG_DIR, 'fpp', '.fpp.keys')
 
 
 class KeyBindings(object):
