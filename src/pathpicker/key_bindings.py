@@ -6,9 +6,8 @@ import configparser
 import os
 from typing import List, NewType, Tuple
 
-from pathpicker.state_files import FPP_DIR
-
-KEY_BINDINGS_FILE = os.path.join(FPP_DIR, ".fpp.keys")
+CONFIG_DIR = os.environ.get("XDG_CONFIG_HOME") or "~/.config"
+KEY_BINDINGS_FILE = os.path.join(CONFIG_DIR, "fpp", ".fpp.keys")
 
 
 KeyBindings = NewType("KeyBindings", List[Tuple[str, str]])
