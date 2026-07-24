@@ -3,10 +3,10 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 from __future__ import print_function
+from charCodeMapping import CHAR_TO_CODE
 
 import sys
 sys.path.insert(0, '../')
-from charCodeMapping import CHAR_TO_CODE
 
 ATTRIBUTE_SYMBOL_MAPPING = {
     0: ' ',

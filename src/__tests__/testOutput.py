@@ -3,6 +3,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 from __future__ import print_function
+import stateFiles
+import output
 
 import os
 import shutil
@@ -11,9 +13,6 @@ import tempfile
 import unittest
 
 sys.path.insert(0, '../')
-
-import output
-import stateFiles
 
 
 class LineObjForTest(object):

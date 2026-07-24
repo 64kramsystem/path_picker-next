@@ -19,6 +19,7 @@ else
 fi
 
 cd ./src/__tests__/
+export PYTHONPATH="../${PYTHONPATH:+:$PYTHONPATH}"
 python testParsing.py && python testScreen.py && python testKeyBindingsParsing.py && python testOutput.py > /dev/null
 if [ $? -eq 0 ]
 then

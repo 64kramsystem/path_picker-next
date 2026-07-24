@@ -3,12 +3,12 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 from __future__ import print_function
+import unittest
+import os
+import screenTestRunner
 
 import sys
 sys.path.insert(0, '../')
-import screenTestRunner
-import os
-import unittest
 
 
 EXPECTED_DIR = './expected/'

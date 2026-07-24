@@ -3,16 +3,16 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 from __future__ import print_function
+import format
+from formattedText import FormattedText
+from localTestCases import LOCAL_TEST_CASES
+import parse
 
 import sys
 import unittest
 import os
 sys.path.insert(0, '../')
 
-import parse
-from localTestCases import LOCAL_TEST_CASES
-from formattedText import FormattedText
-import format
 
 fileTestCases = [{
     'input': 'run codex resume 019c8bbd-0f81-77a2-b170-76a70ab513e3',

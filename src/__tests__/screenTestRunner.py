@@ -3,6 +3,13 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 from __future__ import print_function
+import parse
+import choose
+import processInput
+from screenFlags import ScreenFlags
+from screenForTest import ScreenForTest
+from cursesForTest import CursesForTest
+from keyBindingsForTest import KeyBindingsForTest
 
 import curses
 import sys
@@ -10,13 +17,6 @@ import os
 
 sys.path.insert(0, '../')
 
-from keyBindingsForTest import KeyBindingsForTest
-from cursesForTest import CursesForTest
-from screenForTest import ScreenForTest
-from screenFlags import ScreenFlags
-import processInput
-import choose
-import parse
 
 INPUT_DIR = './inputs/'
 
