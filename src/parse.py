@@ -21,6 +21,12 @@ UNPREFIXED_COMMIT_HASH_REGEX = re.compile(
     r'^([0-9a-f]{6,})( |$)')
 JUST_COMMIT_HASH_REGEX = re.compile(
     r'[0-9a-f]{6,}$')
+JUST_SESSION_ID_REGEX = re.compile(
+    r'[-0-9a-f]{36}$')
+CODEX_RESUME_REGEX = re.compile(
+    r'run codex resume.+([-0-9a-f]{36})\)?$')
+CLAUDE_RESUME_REGEX = re.compile(
+    r'^claude --resume ([-0-9a-f]{36})$')
 MASTER_REGEX = re.compile(
     r'(\/?([a-z.A-Z0-9\-_]+\/)+[+@a-zA-Z0-9\-_+.]+\.[a-zA-Z0-9]{1,10})[:-]{0,1}(\d+)?')
 MASTER_REGEX_MORE_EXTENSIONS = re.compile(
@@ -136,6 +142,15 @@ REGEX_WATERFALL = [{
     # Homedirs need a separate regex.
     'regex': HOMEDIR_REGEX,
     'name': 'HOMEDIR_REGEX',
+}, {
+    'regex': CODEX_RESUME_REGEX,
+    'name': 'CODEX_RESUME_REGEX',
+    'noNum': True,
+    'matchIndex': 1,
+}, {
+    'regex': CLAUDE_RESUME_REGEX,
+    'name': 'CLAUDE_RESUME_REGEX',
+    'noNum': True,
 }, {
     'regex': COMMIT_HASH_REGEX,
     'name': 'COMMIT_HASH_REGEX',
@@ -277,7 +292,8 @@ def matchLine(line, validateFileExists=False, allInput=False):
         (filePath, _, _) = result
         if os.path.isfile(prependDir(filePath, withFileInspection=True)) or \
            filePath[0:4] == '.../' or \
-           JUST_COMMIT_HASH_REGEX.fullmatch(filePath):
+           JUST_COMMIT_HASH_REGEX.fullmatch(filePath) or \
+           JUST_SESSION_ID_REGEX.fullmatch(filePath):
             return result
     return None
 
@@ -300,7 +316,8 @@ def matchLineImpl(line, withFileInspection=False, withAllLinesMatched=False):
         if not matches:
             continue
 
-        unpackFunc = unpackMatchesNoNum if \
+        unpackFunc = (lambda match: unpackMatchesNoNum(
+            match, matchIndex=regexConfig.get('matchIndex', 0))) if \
             regexConfig.get('noNum') else \
             lambda x: unpackMatches(x, numIndex=regexConfig.get('numIndex', 2))
 
@@ -355,8 +372,9 @@ def prependDir(file, withFileInspection=False):
     if first in REPOS:
         return os.path.expanduser('~/' + file)
 
-    if JUST_COMMIT_HASH_REGEX.fullmatch(file):
-        # commit hashes are not paths, so leave them untouched
+    if JUST_COMMIT_HASH_REGEX.fullmatch(file) or \
+       JUST_SESSION_ID_REGEX.fullmatch(file):
+        # commit hashes and session IDs are not paths, so leave them untouched
         return file
 
     if '/' not in file:
@@ -387,8 +405,27 @@ def prependDir(file, withFileInspection=False):
     return topLevelPath
 
 
-def unpackMatchesNoNum(matches):
-    return (matches.groups()[0], 0, matches)
+class CapturedMatch:
+    """Expose one capture as the match used for UI highlighting."""
+
+    def __init__(self, matches, index):
+        self.matches = matches
+        self.index = index
+
+    def start(self):
+        return self.matches.start(self.index)
+
+    def end(self):
+        return self.matches.end(self.index)
+
+    def group(self):
+        return self.matches.group(self.index)
+
+
+def unpackMatchesNoNum(matches, matchIndex=0):
+    highlightedMatch = matches if matchIndex == 0 else \
+        CapturedMatch(matches, matchIndex)
+    return (matches.groups()[0], 0, highlightedMatch)
 
 
 def unpackMatches(matches, numIndex):

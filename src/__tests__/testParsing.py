@@ -15,6 +15,23 @@ from formattedText import FormattedText
 import format
 
 fileTestCases = [{
+    'input': 'run codex resume 019c8bbd-0f81-77a2-b170-76a70ab513e3',
+    'match': True,
+    'file': '019c8bbd-0f81-77a2-b170-76a70ab513e3',
+    'disableFuzzTest': True,
+}, {
+    'input': 'run codex resume, then select foo bar (019f94b0-470f-74f2-8b1d-42f298d1d559)',
+    'match': True,
+    'file': '019f94b0-470f-74f2-8b1d-42f298d1d559',
+    'validateFileExists': True,
+    'disableFuzzTest': True,
+}, {
+    'input': 'claude --resume 019c8bbd-0f81-77a2-b170-76a70ab513e3',
+    'match': True,
+    'file': '019c8bbd-0f81-77a2-b170-76a70ab513e3',
+    'validateFileExists': True,
+    'disableFuzzTest': True,
+}, {
     'input': 'html/js/hotness.js',
     'match': True,
     'file': 'html/js/hotness.js'
@@ -514,6 +531,17 @@ class TestParseFunction(unittest.TestCase):
                         'Highlight for %s should cover only the hash' %
                         testCase['input'])
         print('Tested %d commit hash cases.' % len(commitHashTestCases))
+
+    def testSessionIdHighlight(self):
+        line = ('To continue this session, run codex resume, then select '
+                'GhidraMCP development '
+                '(019f90a1-516d-72b3-9c00-c75d74a5cdcc)')
+        result = parse.matchLine(line)
+        lineObj = format.LineMatch(FormattedText(line), result, 0)
+        self.assertEqual(
+            '019f90a1-516d-72b3-9c00-c75d74a5cdcc',
+            line[lineObj.start:lineObj.end])
+        print('Tested session ID highlight.')
 
     def testGitDiffPrefixHighlight(self):
         # the +/- markers and git diff prefixes (a/, c/, ...) are stripped
