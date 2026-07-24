@@ -22,7 +22,7 @@ class TestKeyBindingsParser(unittest.TestCase):
 
         self.assertEqual(
             keyBindings.KEY_BINDINGS_FILE,
-            os.path.join(expectedDir, 'fpp', '.fpp.keys')
+            os.path.join(expectedDir, 'fpp', 'key_bindings')
         )
 
     def testIgnoreNonExistingConfigurationFile(self):

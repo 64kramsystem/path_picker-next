@@ -14,7 +14,7 @@ else:
 
 
 CONFIG_DIR = os.environ.get('XDG_CONFIG_HOME') or '~/.config'
-KEY_BINDINGS_FILE = os.path.join(CONFIG_DIR, 'fpp', '.fpp.keys')
+KEY_BINDINGS_FILE = os.path.join(CONFIG_DIR, 'fpp', 'key_bindings')
 
 
 class KeyBindings(object):
