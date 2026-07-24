@@ -132,8 +132,8 @@ previous input used and selection pickle. By default, these files are saved
 in $XDG_CACHE_HOME/fpp, but the $FPP_DIR environment variable can be used to tell
 PathPicker to use another directory.
 
-Custom key bindings are read from $XDG_CONFIG_HOME/fpp/.fpp.keys (by default,
-~/.config/fpp/.fpp.keys).
+Custom key bindings are read from $XDG_CONFIG_HOME/fpp/key_bindings (by default,
+~/.config/fpp/key_bindings).
 
 ~ Colors ~
 
