@@ -6,16 +6,25 @@ import os
 import re
 import subprocess
 from functools import partial
-from typing import Callable, List, Match, NamedTuple, NewType, Optional, Pattern, Tuple
+from typing import Callable, List, Match, NamedTuple, NewType, Optional, Pattern, Protocol, Tuple
 
 from pathpicker import logger
 from pathpicker.repos import REPOS
 
-MatchResult = NewType("MatchResult", Tuple[str, int, Match])
+class MatchSpan(Protocol):
+    def start(self) -> int: ...
+    def end(self) -> int: ...
+    def group(self) -> str: ...
+
+
+MatchResult = NewType("MatchResult", Tuple[str, int, MatchSpan])
 GIT_DIFF_PREFIXES = ("a/", "b/", "c/", "i/", "o/", "w/")
 COMMIT_HASH_REGEX = re.compile(r"(?<=^[+-] )([0-9a-f]{6,})( |$)")
 UNPREFIXED_COMMIT_HASH_REGEX = re.compile(r"^([0-9a-f]{6,})( |$)")
 JUST_COMMIT_HASH_REGEX = re.compile(r"[0-9a-f]{6,}$")
+JUST_SESSION_ID_REGEX = re.compile(r"[-0-9a-f]{36}$")
+CODEX_RESUME_REGEX = re.compile(r"run codex resume.+([-0-9a-f]{36})\)?$")
+CLAUDE_RESUME_REGEX = re.compile(r"^claude --resume ([-0-9a-f]{36})$")
 
 MASTER_REGEX = re.compile(
     r"(/?([a-z.A-Z0-9\-_]+/)+[@a-zA-Z0-9\-_+.]+\.[a-zA-Z0-9]{1,10})[:-]?(\d+)?"
@@ -144,11 +153,14 @@ class RegexConfig(NamedTuple):
     no_num: bool = False
     only_with_file_inspection: bool = False
     with_all_lines_matched: bool = False
+    match_index: int = 0
 
 
 REGEX_WATERFALL: List[RegexConfig] = [
     # Homedirs need a separate regex.
     RegexConfig("HOMEDIR_REGEX", HOMEDIR_REGEX),
+    RegexConfig("CODEX_RESUME_REGEX", CODEX_RESUME_REGEX, no_num=True, match_index=1),
+    RegexConfig("CLAUDE_RESUME_REGEX", CLAUDE_RESUME_REGEX, no_num=True),
     RegexConfig("COMMIT_HASH_REGEX", COMMIT_HASH_REGEX, no_num=True),
     RegexConfig("UNPREFIXED_COMMIT_HASH_REGEX", UNPREFIXED_COMMIT_HASH_REGEX, no_num=True),
     # The master regex matches tbgs results with
@@ -303,6 +315,7 @@ def match_line(
             os.path.isfile(prepend_dir(file_path, with_file_inspection=True))
             or file_path[0:4] == ".../"
             or JUST_COMMIT_HASH_REGEX.fullmatch(file_path)
+            or JUST_SESSION_ID_REGEX.fullmatch(file_path)
         ):
             return result
     return None
@@ -330,7 +343,9 @@ def match_line_impl(
         unpack_matches_num_index_var: Callable = partial(
             unpack_matches, num_index=regex_config.num_index
         )
-        unpack_matches_no_num_var: Callable = unpack_matches_no_num
+        unpack_matches_no_num_var: Callable = partial(
+            unpack_matches_no_num, match_index=regex_config.match_index
+        )
         unpack_func: Callable = (
             unpack_matches_no_num_var
             if regex_config.no_num
@@ -387,7 +402,7 @@ def prepend_dir(file: str, with_file_inspection: bool = False) -> str:
     if first in REPOS + (os.environ.get("FPP_REPOS") or "").split(","):
         return os.path.expanduser("~/" + file)
 
-    if JUST_COMMIT_HASH_REGEX.fullmatch(file):
+    if JUST_COMMIT_HASH_REGEX.fullmatch(file) or JUST_SESSION_ID_REGEX.fullmatch(file):
         return file
 
     if "/" not in file:
@@ -417,8 +432,24 @@ def prepend_dir(file: str, with_file_inspection: bool = False) -> str:
     return top_level_path
 
 
-def unpack_matches_no_num(matches: Match) -> MatchResult:
-    return MatchResult((matches.groups()[0], 0, matches))
+class CapturedMatch:
+    def __init__(self, matches: Match, index: int):
+        self.matches = matches
+        self.index = index
+
+    def start(self) -> int:
+        return self.matches.start(self.index)
+
+    def end(self) -> int:
+        return self.matches.end(self.index)
+
+    def group(self) -> str:
+        return self.matches.group(self.index)
+
+
+def unpack_matches_no_num(matches: Match, match_index: int = 0) -> MatchResult:
+    highlighted_match = CapturedMatch(matches, match_index) if match_index else matches
+    return MatchResult((matches.groups()[0], 0, highlighted_match))
 
 
 def unpack_matches(matches: Match, num_index: int) -> MatchResult:
