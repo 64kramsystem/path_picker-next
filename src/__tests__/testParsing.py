@@ -11,6 +11,7 @@ import parse
 import sys
 import unittest
 import os
+import tempfile
 sys.path.insert(0, '../')
 
 
@@ -194,6 +195,10 @@ fileTestCases = [{
 }, {
     'input': 'SO.MANY&&PERIODSTXT',
     'match': False
+}, {
+    'input': 'cfg_aliases 0.2.2',
+    'match': False,
+    'disableFuzzTest': True,
 }, {
     'input': 'test src/categories/NSDate+Category.h',
     'match': True,
@@ -580,6 +585,23 @@ class TestParseFunction(unittest.TestCase):
         for testCase in fileTestCases:
             self.checkFileResult(testCase)
         print('Tested %d cases.' % len(fileTestCases))
+
+    def testNumericExtensionInLongListing(self):
+        descriptor, filePath = tempfile.mkstemp(
+            prefix='260726-herrang_w4-00-', suffix='.mp4', dir='.')
+        os.close(descriptor)
+        fileName = os.path.basename(filePath)
+        line = '-rw-r--r-- 1 saverio 9196217 Aug  3 22:00 ' + fileName
+
+        try:
+            result = parse.matchLine(line, validateFileExists=True)
+        finally:
+            os.remove(filePath)
+
+        self.assertTrue(
+            result, 'Expected numeric extension in ls -l output to match')
+        self.assertEqual(fileName, result[0])
+        print('Tested numeric extension in long listing.')
 
     def testAllInputMatches(self):
         for testCase in allInputTestCases:

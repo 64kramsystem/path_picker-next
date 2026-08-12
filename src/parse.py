@@ -41,6 +41,8 @@ JUST_FILE_WITH_NUMBER = re.compile(
     r'([@%+a-z.A-Z0-9\-_]+\.[a-zA-Z]{1,10})[:-](\d+)(\s|$|:)+')
 JUST_FILE = re.compile(
     r'([@%+a-z.A-Z0-9\-_]+\.[a-zA-Z]{1,10})(\s|$|:)+')
+JUST_FILE_WITH_ALPHANUMERIC_EXTENSION = re.compile(
+    r'([@%+a-z.A-Z0-9\-_]+\.[a-zA-Z0-9]{1,10})(\s|$|:)+')
 JUST_EMACS_TEMP_FILE = re.compile(
     r'([@%+a-z.A-Z0-9\-_]+\.[a-zA-Z]{1,10}~)(\s|$|:)+')
 JUST_VIM_TEMP_FILE = re.compile(
@@ -215,6 +217,14 @@ REGEX_WATERFALL = [{
     'regex': JUST_FILE,
     'name': 'JUST_FILE',
     'noNum': True
+}, {
+    # Standalone filenames with digits in the extension are ambiguous with
+    # non-path output such as git object IDs, so only accept them when the
+    # candidate exists on the filesystem.
+    'regex': JUST_FILE_WITH_ALPHANUMERIC_EXTENSION,
+    'name': 'JUST_FILE_WITH_ALPHANUMERIC_EXTENSION',
+    'noNum': True,
+    'onlyWithFileInspection': True,
 }, {
     # ok if thats not there, try do to filesystem validation
     # for just files with spaces
