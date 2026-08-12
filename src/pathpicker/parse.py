@@ -43,6 +43,9 @@ JUST_FILE_WITH_NUMBER = re.compile(
     r"([@%+a-z.A-Z0-9\-_]+\.[a-zA-Z]{1,10})[:-](\d+)(\s|$|:)+"
 )
 JUST_FILE = re.compile(r"([@%+a-z.A-Z0-9\-_]+\.[a-zA-Z]{1,10})(\s|$|:)+")
+JUST_FILE_WITH_ALPHANUMERIC_EXTENSION = re.compile(
+    r"([@%+a-z.A-Z0-9\-_]+\.[a-zA-Z0-9]{1,10})(\s|$|:)+"
+)
 JUST_EMACS_TEMP_FILE = re.compile(r"([@%+a-z.A-Z0-9\-_]+\.[a-zA-Z]{1,10}~)(\s|$|:)+")
 JUST_VIM_TEMP_FILE = re.compile(r"(#[@%+a-z.A-Z0-9\-_]+\.[a-zA-Z]{1,10}#)(\s|$|:)+")
 # start with a normal char for ls -l
@@ -224,6 +227,12 @@ REGEX_WATERFALL: List[RegexConfig] = [
         "JUST_FILE",
         JUST_FILE,
         no_num=True,
+    ),
+    RegexConfig(
+        "JUST_FILE_WITH_ALPHANUMERIC_EXTENSION",
+        JUST_FILE_WITH_ALPHANUMERIC_EXTENSION,
+        no_num=True,
+        only_with_file_inspection=True,
     ),
     # Ok if that's not there, try do to filesystem validation
     # for just files with spaces
