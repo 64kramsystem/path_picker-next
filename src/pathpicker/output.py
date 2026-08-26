@@ -6,7 +6,7 @@ import os
 import pickle
 from typing import List, Tuple
 
-from pathpicker import logger, state_files
+from pathpicker import logger, parse, state_files
 from pathpicker.line_format import LineMatch
 
 RED_COLOR = "\033[0;31m"
@@ -49,6 +49,21 @@ def exec_composed_command(command: str, line_objs: List[LineMatch]) -> None:
     else:
         append_friendly_command(command)
     append_exit()
+
+
+def exec_preconfigured_command(key: str, command: str, line_objs: List[LineMatch]) -> None:
+    if key == "s":
+        if len(line_objs) > 1:
+            append_error("s accepts only one selected entry.")
+            append_to_file("exit 1")
+            return
+        if line_objs and parse.JUST_SESSION_ID_REGEX.fullmatch(line_objs[0].get_path()):
+            line = line_objs[0].get_original_line()
+            if parse.CODEX_RESUME_REGEX.search(line):
+                command = "cod"
+            elif parse.CLAUDE_RESUME_REGEX.search(line):
+                command = "cla"
+    exec_composed_command(command, line_objs)
 
 
 def edit_files(line_objs: List[LineMatch]) -> None:

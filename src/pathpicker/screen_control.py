@@ -506,7 +506,7 @@ class Controller:
 
         for bound_key, command in self.key_bindings:
             if key == bound_key:
-                self.execute_preconfigured_command(command)
+                self.execute_preconfigured_command(bound_key, command)
 
     def get_paths_to_use(self) -> List[LineMatch]:
         # if we have selected paths, those, otherwise hovered
@@ -627,9 +627,9 @@ class Controller:
         output.exec_composed_command(command, line_objs)
         sys.exit(0)
 
-    def execute_preconfigured_command(self, command: str) -> None:
+    def execute_preconfigured_command(self, key: str, command: str) -> None:
         line_objs = self.get_paths_to_use()
-        output.exec_composed_command(command, line_objs)
+        output.exec_preconfigured_command(key, command, line_objs)
         sys.exit(0)
 
     def on_enter(self) -> None:

@@ -135,6 +135,9 @@ class LineMatch(LineBase):
     def get_path(self) -> str:
         return self.path
 
+    def get_original_line(self) -> str:
+        return str(self.formatted_line)
+
     def get_file_size(self) -> str:
         size = os.path.getsize(self.path)
         for unit in ["B", "K", "M", "G", "T", "P", "E", "Z"]:
