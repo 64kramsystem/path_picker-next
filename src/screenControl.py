@@ -473,7 +473,7 @@ class Controller(object):
 
         for boundKey, command in self.keyBindings.bindings:
             if key == boundKey:
-                self.executePreconfiguredCommand(command)
+                self.executePreconfiguredCommand(boundKey, command)
 
     def getPathsToUse(self):
         # if we have selected paths, those, otherwise hovered
@@ -591,9 +591,9 @@ class Controller(object):
         output.execComposedCommand(command, lineObjs)
         sys.exit(0)
 
-    def executePreconfiguredCommand(self, command):
+    def executePreconfiguredCommand(self, key, command):
         lineObjs = self.getPathsToUse()
-        output.execComposedCommand(command, lineObjs)
+        output.execPreconfiguredCommand(key, command, lineObjs)
         sys.exit(0)
 
     def onEnter(self):

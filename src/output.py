@@ -8,6 +8,7 @@ import re
 from builtins import str
 
 import logger
+import parse
 import stateFiles
 
 DEBUG = '~/.fbPager.debug.text'
@@ -54,6 +55,24 @@ def execComposedCommand(command, lineObjs):
     else:
         appendFriendlyCommand(command)
     appendExit()
+
+
+def execPreconfiguredCommand(key, command, lineObjs):
+    if key == 's':
+        if len(lineObjs) > 1:
+            appendError('s accepts only one selected entry.')
+            appendToFile('exit 1')
+            return
+
+        if lineObjs and parse.JUST_SESSION_ID_REGEX.fullmatch(
+                lineObjs[0].getPath()):
+            line = lineObjs[0].getOriginalLine()
+            if parse.CODEX_RESUME_REGEX.search(line):
+                command = 'cod'
+            elif parse.CLAUDE_RESUME_REGEX.search(line):
+                command = 'cla'
+
+    execComposedCommand(command, lineObjs)
 
 
 def editFiles(lineObjs):

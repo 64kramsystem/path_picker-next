@@ -5,6 +5,7 @@
 from __future__ import print_function
 import stateFiles
 import output
+import processInput
 
 import os
 import shutil
@@ -17,16 +18,20 @@ sys.path.insert(0, '../')
 
 class LineObjForTest(object):
 
-    def __init__(self, path, lineNum=0, resolvable=True):
+    def __init__(self, path, lineNum=0, resolvable=True, originalLine=None):
         self.path = path
         self.lineNum = lineNum
         self.resolvable = resolvable
+        self.originalLine = originalLine or path
 
     def getPath(self):
         return self.path
 
     def getLineNum(self):
         return self.lineNum
+
+    def getOriginalLine(self):
+        return self.originalLine
 
     def getDir(self):
         return os.path.dirname(self.path)
@@ -90,6 +95,54 @@ class TestOutput(unittest.TestCase):
         self.assertNotIn('echo "executing command:"', contents)
         self.assertIn("cat 'a/b.py'", contents)
         self.assertIn('exit $?;', contents)
+
+    def testExecPreconfiguredSCommandResumesCodexSession(self):
+        sessionId = '019f94b0-470f-74f2-8b1d-42f298d1d559'
+        lineObj = LineObjForTest(
+            sessionId,
+            originalLine=('run codex resume, then select foo bar (%s)' %
+                          sessionId))
+        output.execPreconfiguredCommand('s', 'code -g', [lineObj])
+        contents = self.getOutput()
+        self.assertIn("cod '%s'" % sessionId, contents)
+        self.assertNotIn('code -g', contents)
+
+    def testExecPreconfiguredSCommandResumesClaudeSession(self):
+        sessionId = '019c8bbd-0f81-77a2-b170-76a70ab513e3'
+        lineObj = LineObjForTest(
+            sessionId,
+            originalLine='claude --resume %s' % sessionId)
+        output.execPreconfiguredCommand('s', 'code -g', [lineObj])
+        contents = self.getOutput()
+        self.assertIn("cla '%s'" % sessionId, contents)
+        self.assertNotIn('code -g', contents)
+
+    def testExecPreconfiguredSCommandUsesConfiguredCommandForFile(self):
+        lineObj = LineObjForTest(
+            'src/output.py', originalLine='src/output.py:42')
+        output.execPreconfiguredCommand('s', 'code -g', [lineObj])
+        self.assertIn("code -g 'src/output.py'", self.getOutput())
+
+    def testExecPreconfiguredSCommandUsesHighlightedFileFromSessionLine(self):
+        sessionId = '019f94b0-470f-74f2-8b1d-42f298d1d559'
+        line = ('run codex resume, then select ~/src/output.py (%s)' %
+                sessionId)
+        lineObj = processInput.getLineObjsFromLines(
+            [line], validateFileExists=False)[0]
+        output.execPreconfiguredCommand('s', 'code -g', [lineObj])
+        contents = self.getOutput()
+        self.assertIn("code -g '%s'" %
+                      os.path.expanduser('~/src/output.py'), contents)
+        self.assertNotIn('cod ', contents)
+
+    def testExecPreconfiguredSCommandRejectsMultipleSelections(self):
+        lineObjs = [LineObjForTest('src/output.py'),
+                    LineObjForTest('src/parse.py')]
+        output.execPreconfiguredCommand('s', 'code -g', lineObjs)
+        contents = self.getOutput()
+        self.assertIn('s accepts only one selected entry.', contents)
+        self.assertIn('exit 1', contents)
+        self.assertNotIn('code -g', contents)
 
     def testExecComposedCommandWarnsOnInvalidFiles(self):
         output.execComposedCommand(

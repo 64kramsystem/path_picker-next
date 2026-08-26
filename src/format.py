@@ -117,6 +117,9 @@ class LineMatch(object):
     def getPath(self):
         return self.path
 
+    def getOriginalLine(self):
+        return str(self.formattedLine)
+
     def getSizeInBytes(self):
         bashCommand = "ls -lh " + self.path
         output = subprocess.check_output(bashCommand.split())
