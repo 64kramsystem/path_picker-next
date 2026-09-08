@@ -24,7 +24,8 @@ JUST_COMMIT_HASH_REGEX = re.compile(
 JUST_SESSION_ID_REGEX = re.compile(
     r'[-0-9a-f]{36}$')
 CODEX_RESUME_REGEX = re.compile(
-    r'run codex resume.+([-0-9a-f]{36})\)?$')
+    r'\bcodex resume.+\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-'
+    r'[0-9a-f]{4}-[0-9a-f]{12})\)?$')
 CLAUDE_RESUME_REGEX = re.compile(
     r'^claude --resume ([-0-9a-f]{36})$')
 MASTER_REGEX = re.compile(

@@ -117,6 +117,22 @@ class TestOutput(unittest.TestCase):
         self.assertIn("cla '%s'" % sessionId, contents)
         self.assertNotIn('code -g', contents)
 
+    def testExecPreconfiguredSCommandResumesCodexFromMultilineFooter(self):
+        sessionId = '01a08031-f701-7380-adc3-a651a75a4da3'
+        lines = [
+            'To continue this session, run:\n',
+            '  codex resume %s\n' % sessionId,
+            'Or run codex resume and select Assess palware fork.\n',
+        ]
+        lineObj = processInput.getLineObjsFromLines(
+            lines, validateFileExists=True)[1]
+        self.assertEqual(sessionId, lineObj.getPath())
+        self.assertEqual(sessionId, lines[1][lineObj.start:lineObj.end])
+        output.execPreconfiguredCommand('s', 'code -g', [lineObj])
+        contents = self.getOutput()
+        self.assertIn("cod '%s'" % sessionId, contents)
+        self.assertNotIn('code -g', contents)
+
     def testExecPreconfiguredSCommandUsesConfiguredCommandForFile(self):
         lineObj = LineObjForTest(
             'src/output.py', originalLine='src/output.py:42')

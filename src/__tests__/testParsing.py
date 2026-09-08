@@ -16,6 +16,20 @@ sys.path.insert(0, '../')
 
 
 fileTestCases = [{
+    'input': '  codex resume 01a08031-f701-7380-adc3-a651a75a4da3',
+    'match': True,
+    'file': '01a08031-f701-7380-adc3-a651a75a4da3',
+    'validateFileExists': True,
+    'disableFuzzTest': True,
+}, {
+    'input': 'codex resume 0123456789abcdef0123456789abcdef01234567',
+    'match': False,
+    'disableFuzzTest': True,
+}, {
+    'input': 'codex resume f01a08031-f701-7380-adc3-a651a75a4da3',
+    'match': False,
+    'disableFuzzTest': True,
+}, {
     'input': 'run codex resume 019c8bbd-0f81-77a2-b170-76a70ab513e3',
     'match': True,
     'file': '019c8bbd-0f81-77a2-b170-76a70ab513e3',
