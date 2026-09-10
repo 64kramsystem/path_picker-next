@@ -154,6 +154,7 @@ REGEX_WATERFALL = [{
     'regex': CLAUDE_RESUME_REGEX,
     'name': 'CLAUDE_RESUME_REGEX',
     'noNum': True,
+    'matchIndex': 1,
 }, {
     'regex': COMMIT_HASH_REGEX,
     'name': 'COMMIT_HASH_REGEX',
