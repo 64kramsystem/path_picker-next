@@ -166,7 +166,7 @@ REGEX_WATERFALL: List[RegexConfig] = [
     # Homedirs need a separate regex.
     RegexConfig("HOMEDIR_REGEX", HOMEDIR_REGEX),
     RegexConfig("CODEX_RESUME_REGEX", CODEX_RESUME_REGEX, no_num=True, match_index=1),
-    RegexConfig("CLAUDE_RESUME_REGEX", CLAUDE_RESUME_REGEX, no_num=True),
+    RegexConfig("CLAUDE_RESUME_REGEX", CLAUDE_RESUME_REGEX, no_num=True, match_index=1),
     RegexConfig("COMMIT_HASH_REGEX", COMMIT_HASH_REGEX, no_num=True),
     RegexConfig("UNPREFIXED_COMMIT_HASH_REGEX", UNPREFIXED_COMMIT_HASH_REGEX, no_num=True),
     # The master regex matches tbgs results with
