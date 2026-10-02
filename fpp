@@ -39,7 +39,12 @@ function doProgram {
   # now close stdin and choose input...
   exec 0<&-
 
-  $PYTHONCMD "$BASEDIR/src/choose.py" "$@" < /dev/tty
+  # macOS kqueue cannot monitor /dev/tty (e.g. when resuming Claude).
+  # Use the actual terminal device from stdout or stderr when available.
+  local tty_path
+  tty_path=$(tty <&1 2>/dev/null) || tty_path=$(tty <&2 2>/dev/null) || tty_path=/dev/tty
+
+  $PYTHONCMD "$BASEDIR/src/choose.py" "$@" < "$tty_path"
   # Determine if running from within vim shell
   IFLAG=""
   if [ -z "$VIMRUNTIME" -a "$NONINTERACTIVE" = false ]; then
@@ -54,13 +59,13 @@ function doProgram {
   # in order to determine which shell we are on
   if [ -n "$BASH" -o -n "$ZSH_NAME" ]; then
     if [ -e "${SHELL}" ]; then
-      $SHELL $IFLAG "$FPP_DIR/.fpp.sh" < /dev/tty
+      $SHELL $IFLAG "$FPP_DIR/.fpp.sh" < "$tty_path"
     else
       (>&2 echo "Your SHELL bash variable ${SHELL} does not exist, please export it explicitly");
-      $BASH $IFLAG "$FPP_DIR/.fpp.sh" < /dev/tty
+      $BASH $IFLAG "$FPP_DIR/.fpp.sh" < "$tty_path"
     fi
   else
-    /bin/bash $IFLAG "$FPP_DIR/.fpp.sh" < /dev/tty
+    /bin/bash $IFLAG "$FPP_DIR/.fpp.sh" < "$tty_path"
   fi
 }
 
