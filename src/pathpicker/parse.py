@@ -46,6 +46,7 @@ JUST_FILE_WITH_NUMBER = re.compile(
     r"([@%+a-z.A-Z0-9\-_]+\.[a-zA-Z]{1,10})[:-](\d+)(\s|$|:)+"
 )
 JUST_FILE = re.compile(r"([@%+a-z.A-Z0-9\-_]+\.[a-zA-Z]{1,10})(\s|$|:)+")
+JUST_FILE_WITHOUT_EXTENSION = re.compile(r"(?<!\S)([@%+a-zA-Z0-9_-]+)(?!\S)")
 JUST_FILE_WITH_ALPHANUMERIC_EXTENSION = re.compile(
     r"([@%+a-z.A-Z0-9\-_]+\.[a-zA-Z0-9]{1,10})(\s|$|:)+"
 )
@@ -317,8 +318,6 @@ def match_line(
     results = match_line_impl(
         line, with_file_inspection=True, with_all_lines_matched=all_input
     )
-    if not results:
-        return None
     # ok now we are going to check if this result is an actual
     # file...
     for result in results:
@@ -330,6 +329,11 @@ def match_line(
             or JUST_SESSION_ID_REGEX.fullmatch(file_path)
         ):
             return result
+    if not all_input:
+        for matches in JUST_FILE_WITHOUT_EXTENSION.finditer(line):
+            file_path = matches.group(1)
+            if os.path.isfile(prepend_dir(file_path, with_file_inspection=True)):
+                return unpack_matches_no_num(matches)
     return None
 
 

@@ -8,9 +8,12 @@ import output
 import processInput
 
 import os
+import pty
 import shutil
+import subprocess
 import sys
 import tempfile
+import threading
 import unittest
 
 sys.path.insert(0, '../')
@@ -70,6 +73,64 @@ class TestOutput(unittest.TestCase):
         lineObjs = [LineObjForTest('a/b.py'), LineObjForTest('c/d.py')]
         command = output.composeFileCommand('cat', lineObjs)
         self.assertEqual("cat 'a/b.py' 'c/d.py'", command)
+
+    def testSelectExtensionlessFileFromTerminalOutput(self):
+        fileName = 'install-windows-11-25h2-vm-ai_finishing'
+        with open(os.path.join(self.fppDir, fileName), 'w'):
+            pass
+        transcript = '''~/code/system_install_scripts(main)⚠️ $ g sn
+commit 5bd4e12 (HEAD -> main, origin/main, origin/HEAD)
+Author: Saverio Miroddi <saverio.pub2@gmail.com>
+Date:   Sat Oct 17 17:10:24 2026 +0200
+
+    Shorten the Windows VM finishing prompt
+
+M  %s
+M  missing-extensionless-file
+~/code/system_install_scripts(main)⚠️ $
+''' % fileName
+        env = dict(os.environ, FPP_DIR=os.path.join(self.fppDir, 'cache'),
+                   TERM='xterm-256color', LINES='24', COLUMNS='120')
+        fpp = os.path.abspath(os.path.join(
+            os.path.dirname(__file__), '..', '..', 'fpp'))
+        master, slave = pty.openpty()
+        terminalOutput = []
+
+        def drainTerminal():
+            while True:
+                try:
+                    chunk = os.read(master, 65536)
+                except OSError:
+                    return
+                if not chunk:
+                    return
+                terminalOutput.append(chunk)
+
+        reader = threading.Thread(target=drainTerminal, daemon=True)
+        reader.start()
+        try:
+            with subprocess.Popen(
+                    [fpp, '--non-interactive', '--execute-keys', 'END', 'ENTER',
+                     '--command', 'printf "%s\\n" $F > selected'],
+                    cwd=self.fppDir, env=env, stdin=subprocess.PIPE,
+                    stdout=slave, stderr=slave) as proc:
+                try:
+                    proc.communicate(transcript.encode('utf-8'), timeout=10)
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                    proc.communicate()
+                    self.fail('PathPicker did not finish selecting the file')
+            self.assertEqual(0, proc.returncode)
+        finally:
+            os.close(slave)
+            reader.join(timeout=2)
+            os.close(master)
+
+        selected = os.path.join(self.fppDir, 'selected')
+        self.assertTrue(os.path.isfile(selected),
+                        b''.join(terminalOutput).decode('utf-8', 'replace'))
+        with open(selected) as result:
+            self.assertEqual('./' + fileName + '\n', result.read())
 
     def testComposeFileCommandSubstitutesToken(self):
         lineObjs = [LineObjForTest('a/b.py')]

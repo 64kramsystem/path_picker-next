@@ -116,8 +116,9 @@ than make specialized parsers for each program, we treat everything as noisy inp
 regexes. To limit the number of calls to the filesystem (to check existence), we are fairly restrictive on the
 candidates we extract.
 
-The downside to this is that files that are single words, with no extension (like `test`), that are not prepended by
-a directory will fail to match. This is a known limitation to PathPicker, and means that it will sometimes fail to find valid files in the input.
+If the more specific patterns find no existing file, PathPicker also checks individual words for
+existing filenames without an extension (like `test`). This fallback requires filesystem validation
+and is disabled by `--no-file-checks`.
 
 * Next, a selector UI built with `curses` is presented to the user. At this point you can select a few files to edit, or input a command
 to execute.
