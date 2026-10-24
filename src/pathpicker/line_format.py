@@ -39,7 +39,7 @@ class SimpleLine(LineBase):
 
     def output(self, printer: ColorPrinter) -> None:
         assert self.controller is not None
-        (min_x, min_y, max_x, max_y) = self.controller.get_chrome_boundaries()
+        min_x, min_y, max_x, max_y = self.controller.get_chrome_boundaries()
         max_len = min(max_x - min_x, len(str(self)))
         y_pos = min_y + self.index + self.controller.get_scroll_offset()
 
@@ -103,7 +103,11 @@ class LineMatch(LineBase):
         self.group = self.group[0 : len(self.group) - trailing_whitespace]
 
         git_prefix = path[:2]
-        if not all_input and git_prefix in parse.GIT_DIFF_PREFIXES and self.group.startswith(git_prefix):
+        if (
+            not all_input
+            and git_prefix in parse.GIT_DIFF_PREFIXES
+            and self.group.startswith(git_prefix)
+        ):
             self.start += 2
             self.group = self.group[2:]
 
@@ -112,8 +116,8 @@ class LineMatch(LineBase):
         self.is_truncated = False
 
         # precalculate the pre, post, and match strings
-        (self.before_text, _) = self.formatted_line.breakat(self.start)
-        (_, self.after_text) = self.formatted_line.breakat(self.end)
+        self.before_text, _ = self.formatted_line.breakat(self.start)
+        _, self.after_text = self.formatted_line.breakat(self.end)
 
         self.decorated_match = FormattedText()
         self.update_decorated_match()
@@ -291,7 +295,7 @@ class LineMatch(LineBase):
 
     def output(self, printer: ColorPrinter) -> None:
         assert self.controller is not None
-        (min_x, min_y, max_x, max_y) = self.controller.get_chrome_boundaries()
+        min_x, min_y, max_x, max_y = self.controller.get_chrome_boundaries()
         y_pos = min_y + self.index + self.controller.get_scroll_offset()
 
         if y_pos < min_y or y_pos >= max_y:

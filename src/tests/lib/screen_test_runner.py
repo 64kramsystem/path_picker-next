@@ -7,17 +7,17 @@ from typing import Dict, List, Optional, Tuple
 
 import choose
 import process_input
-from pathpicker.line_format import LineBase
 from pathpicker import parse
+from pathpicker.line_format import LineBase
 from pathpicker.screen_flags import ScreenFlags
 from tests.lib.curses_api import CursesForTest
 from tests.lib.key_bindings import KEY_BINDINGS_FOR_TEST
 from tests.lib.screen import ScreenForTest
 
 INPUT_DIR = "./inputs/"
-TEST_PREPEND_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(parse.__file__), "..", "..")
-) + "/"
+TEST_PREPEND_PATH = (
+    os.path.abspath(os.path.join(os.path.dirname(parse.__file__), "..", "..")) + "/"
+)
 
 
 def get_line_objs_from_file(

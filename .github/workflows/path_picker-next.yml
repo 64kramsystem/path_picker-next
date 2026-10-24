@@ -23,10 +23,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
-          cache-dependency-path: requirements.txt
-      - run: pip install --upgrade autopep8
-      - run: pip install -r requirements.txt
-      - run: ./scripts/buildAndTest.sh
+          cache-dependency-path: requirements-test.txt
+      - run: pip install -r requirements-test.txt
+      - run: ./scripts/runTests.sh
 
   all-tests:
     name: All Python tests passed

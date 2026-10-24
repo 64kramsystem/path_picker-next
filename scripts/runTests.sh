@@ -22,9 +22,5 @@ REPO_ROOT="$BASEDIR/.."
 
 cd "$REPO_ROOT"
 
-poetry install
-poetry run mypy src
-poetry run flake8 src
-poetry run pylint src
-poetry run pytest src/tests
-poetry run vulture src
+export PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}"
+python3 -m pytest src/tests

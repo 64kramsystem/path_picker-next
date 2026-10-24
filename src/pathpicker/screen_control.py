@@ -359,7 +359,7 @@ class Controller:
         return min_x, CHROME_MIN_Y, max_x, max_y
 
     def get_viewport_height(self) -> int:
-        (_min_x, min_y, _max_x, max_y) = self.get_chrome_boundaries()
+        _min_x, min_y, _max_x, max_y = self.get_chrome_boundaries()
         return max_y - min_y
 
     def set_hover(self, index: int, val: bool) -> None:
@@ -602,7 +602,7 @@ class Controller:
         # but already have a command...
         if self.flags.get_preset_command():
             self.helper_chrome.output(self.mode)
-            (min_x, min_y, _, max_y) = self.get_chrome_boundaries()
+            min_x, min_y, _, max_y = self.get_chrome_boundaries()
             y_start = (max_y + min_y) // 2 - 3
             self.print_provided_command_warning(y_start, min_x)
             self.stdscr.refresh()
@@ -663,7 +663,7 @@ class Controller:
         if self.dirty:
             self.print_all()
             return
-        (_min_x, min_y, _max_x, max_y) = self.get_chrome_boundaries()
+        _min_x, min_y, _max_x, max_y = self.get_chrome_boundaries()
         did_clear_line = False
         for index in self.dirty_indexes:
             y_pos = min_y + index + self.get_scroll_offset()
@@ -678,8 +678,8 @@ class Controller:
 
     def clear_line(self, y_pos: int) -> None:
         """Clear a line of content, excluding the chrome"""
-        (min_x, _, _, _) = self.get_chrome_boundaries()
-        (_, max_x) = self.stdscr.getmaxyx()
+        min_x, _, _, _ = self.get_chrome_boundaries()
+        _, max_x = self.stdscr.getmaxyx()
         chars_to_delete = range(min_x, max_x)
         # we go in the **reverse** order since the original documentation
         # of delchar (http://dell9.ma.utexas.edu/cgi-bin/man-cgi?delch+3)
@@ -739,7 +739,7 @@ class Controller:
 
     def print_x_mode(self) -> None:
         if self.mode == X_MODE:
-            (max_y, _) = self.scroll_bar.screen_control.get_screen_dimensions()
+            max_y, _ = self.scroll_bar.screen_control.get_screen_dimensions()
             top_y = max_y - 2
             min_y = self.scroll_bar.get_min_y() - 1
             for i in range(min_y, top_y + 1):

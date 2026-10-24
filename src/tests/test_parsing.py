@@ -3,6 +3,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 import os
+import tempfile
 import unittest
 from typing import Dict, List, NamedTuple, Optional
 
@@ -298,6 +299,50 @@ FILE_TEST_CASES: List[ParsingTestCase] = [
     ),
 ]
 
+FILE_TEST_CASES.extend(
+    [
+        ParsingTestCase(
+            "  codex resume 01a08031-f701-7380-adc3-a651a75a4da3",
+            True,
+            "01a08031-f701-7380-adc3-a651a75a4da3",
+            validate_file_exists=True,
+            disable_fuzz_test=True,
+        ),
+        ParsingTestCase(
+            "codex resume 0123456789abcdef0123456789abcdef01234567",
+            False,
+            disable_fuzz_test=True,
+        ),
+        ParsingTestCase(
+            "codex resume f01a08031-f701-7380-adc3-a651a75a4da3",
+            False,
+            disable_fuzz_test=True,
+        ),
+        ParsingTestCase(
+            "run codex resume 019c8bbd-0f81-77a2-b170-76a70ab513e3",
+            True,
+            "019c8bbd-0f81-77a2-b170-76a70ab513e3",
+            disable_fuzz_test=True,
+        ),
+        ParsingTestCase(
+            "run codex resume, then select foo bar (019f94b0-470f-74f2-8b1d-42f298d1d559)",
+            True,
+            "019f94b0-470f-74f2-8b1d-42f298d1d559",
+            validate_file_exists=True,
+            disable_fuzz_test=True,
+        ),
+        ParsingTestCase(
+            "claude --resume 019c8bbd-0f81-77a2-b170-76a70ab513e3",
+            True,
+            "019c8bbd-0f81-77a2-b170-76a70ab513e3",
+            validate_file_exists=True,
+            disable_fuzz_test=True,
+        ),
+        ParsingTestCase("cfg_aliases 0.2.2", False, disable_fuzz_test=True),
+    ]
+)
+
+
 PREPEND_DIR_TEST_CASES: List[Dict[str, str]] = [
     {"in": "home/absolute/path.py", "out": "/home/absolute/path.py"},
     {
@@ -345,6 +390,37 @@ TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class TestParseFunction(unittest.TestCase):
+    def test_numeric_extension_in_long_listing(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            filename = "260726-herrang_w4-00-video.mp4"
+            file_path = os.path.join(directory, filename)
+            with open(file_path, "w"):
+                pass
+            previous_directory = os.getcwd()
+            try:
+                os.chdir(directory)
+                result = parse.match_line(
+                    "-rw-r--r-- 1 saverio 9196217 Aug 3 22:00 " + filename,
+                    validate_file_exists=True,
+                )
+            finally:
+                os.chdir(previous_directory)
+            assert result is not None
+            self.assertEqual(filename, result[0])
+
+    def test_session_id_highlight(self) -> None:
+        session_id = "019f90a1-516d-72b3-9c00-c75d74a5cdcc"
+        for line in [
+            "To continue this session, run codex resume, then select GhidraMCP development ("
+            + session_id
+            + ")",
+            "claude --resume " + session_id,
+        ]:
+            result = parse.match_line(line)
+            assert result is not None
+            match = LineMatch(FormattedText(line), result, 0)
+            self.assertEqual(session_id, line[match.start : match.end])
+
     def test_commit_hashes(self) -> None:
         cases = [
             ("+ f8c466e949 Subject", "f8c466e949"),
@@ -368,12 +444,14 @@ class TestParseFunction(unittest.TestCase):
     def test_git_diff_prefixes(self) -> None:
         for prefix in parse.GIT_DIFF_PREFIXES:
             path = "spec/scripts/rds_ri_coverage.bats"
-            self.assertEqual(parse.PREPEND_PATH + path, parse.prepend_dir(prefix + path))
+            self.assertEqual(
+                parse.PREPEND_PATH + path, parse.prepend_dir(prefix + path)
+            )
             line = "--- " + prefix + path
             result = parse.match_line(line)
             assert result is not None
             match = LineMatch(FormattedText(line), result, 0)
-            self.assertEqual(path, line[match.start:match.end])
+            self.assertEqual(path, line[match.start : match.end])
 
     def test_prepend_dir(self) -> None:
         for test_case in PREPEND_DIR_TEST_CASES:
@@ -445,7 +523,7 @@ class TestParseFunction(unittest.TestCase):
                 )
                 continue
 
-            (match, _, _) = result
+            match, _, _ = result
             self.assertEqual(
                 match,
                 test_case.match,

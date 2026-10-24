@@ -16,7 +16,9 @@ from tests.lib.key_bindings import (
 class TestKeyBindingsParser(unittest.TestCase):
     def test_default_file_is_in_xdg_config_dir(self) -> None:
         expected_dir = os.environ.get("XDG_CONFIG_HOME") or "~/.config"
-        self.assertEqual(os.path.join(expected_dir, "fpp", "key_bindings"), KEY_BINDINGS_FILE)
+        self.assertEqual(
+            os.path.join(expected_dir, "fpp", "key_bindings"), KEY_BINDINGS_FILE
+        )
 
     def test_ignore_non_existing_configuration_file(self) -> None:
         file = tempfile.NamedTemporaryFile(delete=True)

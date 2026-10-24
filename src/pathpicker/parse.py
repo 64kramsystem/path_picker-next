@@ -6,10 +6,21 @@ import os
 import re
 import subprocess
 from functools import partial
-from typing import Callable, List, Match, NamedTuple, NewType, Optional, Pattern, Protocol, Tuple
+from typing import (
+    Callable,
+    List,
+    Match,
+    NamedTuple,
+    NewType,
+    Optional,
+    Pattern,
+    Protocol,
+    Tuple,
+)
 
 from pathpicker import logger
 from pathpicker.repos import REPOS
+
 
 class MatchSpan(Protocol):
     def start(self) -> int: ...
@@ -169,7 +180,9 @@ REGEX_WATERFALL: List[RegexConfig] = [
     RegexConfig("CODEX_RESUME_REGEX", CODEX_RESUME_REGEX, no_num=True, match_index=1),
     RegexConfig("CLAUDE_RESUME_REGEX", CLAUDE_RESUME_REGEX, no_num=True, match_index=1),
     RegexConfig("COMMIT_HASH_REGEX", COMMIT_HASH_REGEX, no_num=True),
-    RegexConfig("UNPREFIXED_COMMIT_HASH_REGEX", UNPREFIXED_COMMIT_HASH_REGEX, no_num=True),
+    RegexConfig(
+        "UNPREFIXED_COMMIT_HASH_REGEX", UNPREFIXED_COMMIT_HASH_REGEX, no_num=True
+    ),
     # The master regex matches tbgs results with
     # line numbers, so we prefer that and test it first.
     RegexConfig(
@@ -321,7 +334,7 @@ def match_line(
     # ok now we are going to check if this result is an actual
     # file...
     for result in results:
-        (file_path, _, _) = result
+        file_path, _, _ = result
         if (
             os.path.isfile(prepend_dir(file_path, with_file_inspection=True))
             or file_path[0:4] == ".../"

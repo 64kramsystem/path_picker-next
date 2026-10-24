@@ -51,7 +51,9 @@ def exec_composed_command(command: str, line_objs: List[LineMatch]) -> None:
     append_exit()
 
 
-def exec_preconfigured_command(key: str, command: str, line_objs: List[LineMatch]) -> None:
+def exec_preconfigured_command(
+    key: str, command: str, line_objs: List[LineMatch]
+) -> None:
     if key == "s":
         if len(line_objs) > 1:
             append_error("s accepts only one selected entry.")
@@ -117,15 +119,15 @@ def join_files_into_command(files_and_line_numbers: List[Tuple[str, int]]) -> st
     if editor == "vim -p":
         first_file_path, first_line_num = files_and_line_numbers[0]
         cmd += f" +{first_line_num} {first_file_path}"
-        for (file_path, line_num) in files_and_line_numbers[1:]:
+        for file_path, line_num in files_and_line_numbers[1:]:
             cmd += f' +"tabnew +{line_num} {file_path}"'
     elif editor in ["vim", "mvim", "nvim"] and not os.environ.get("FPP_DISABLE_SPLIT"):
         first_file_path, first_line_num = files_and_line_numbers[0]
         cmd += f" +{first_line_num} {first_file_path}"
-        for (file_path, line_num) in files_and_line_numbers[1:]:
+        for file_path, line_num in files_and_line_numbers[1:]:
             cmd += f' +"vsp +{line_num} {file_path}"'
     else:
-        for (file_path, line_num) in files_and_line_numbers:
+        for file_path, line_num in files_and_line_numbers:
             editor_without_args = editor.split()[0]
             if (
                 editor_without_args
@@ -192,13 +194,11 @@ def append_alias_expansion() -> None:
     # so here we must ask bash to turn on alias expansion.
     shell = os.environ.get("SHELL")
     if shell is None or "fish" not in shell:
-        append_to_file(
-            """
+        append_to_file("""
 if type shopt > /dev/null; then
   shopt -s expand_aliases
 fi
-"""
-        )
+""")
 
 
 def append_friendly_command(command: str) -> None:
