@@ -8,15 +8,14 @@ permissions:
 jobs:
   test:
     name: Python ${{ matrix.python-version }}
-    # Python 3.9 binaries are available for Ubuntu 24.04, but not 26.04.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
         python-version:
-          - "3.9"
-          - "3.13"
+          - "3.14"
+          - "3.15"
 
     steps:
       - uses: actions/checkout@v7
