@@ -1,0 +1,1 @@
+- Commit titles should be prefixed with the project, e.g. `myproject: Foo Bar`, unless the change is global
