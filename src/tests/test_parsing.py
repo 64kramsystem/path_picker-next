@@ -415,11 +415,23 @@ class TestParseFunction(unittest.TestCase):
             + session_id
             + ")",
             "claude --resume " + session_id,
+            "claude --effort low --resume " + session_id,
         ]:
             result = parse.match_line(line)
             assert result is not None
             match = LineMatch(FormattedText(line), result, 0)
             self.assertEqual(session_id, line[match.start : match.end])
+
+    def test_claude_resume_with_options(self) -> None:
+        session_id = "e4726d09-64fe-4dcb-b29e-95ec2e66b001"
+        for options in ("", "--effort low ", "--model sonnet --effort low "):
+            line = "claude " + options + "--resume " + session_id
+            for validate in (False, True):
+                with self.subTest(options=options, validate=validate):
+                    result = parse.match_line(line, validate_file_exists=validate)
+                    self.assertIsNotNone(result)
+                    self.assertEqual(session_id, result[0])
+                    self.assertEqual(session_id, parse.prepend_dir(result[0]))
 
     def test_commit_hashes(self) -> None:
         cases = [

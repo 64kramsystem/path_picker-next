@@ -208,6 +208,23 @@ M  missing-extensionless-file
         self.assertIn("cod '%s'" % session_id, contents)
         self.assertNotIn("code -g", contents)
 
+    def test_exec_preconfigured_s_command_resumes_claude_with_effort_option(self):
+        session_id = "e4726d09-64fe-4dcb-b29e-95ec2e66b001"
+        lines = [
+            "Resume this session with:\n",
+            "claude --effort low --resume %s\n" % session_id,
+            "Password for /home/saverio/.config/ssm-64k/secrets:\n",
+        ]
+        line_obj = process_input.get_line_objs_from_lines(
+            lines, validate_file_exists=True
+        )[1]
+        self.assertEqual(session_id, line_obj.get_path())
+        self.assertEqual(session_id, lines[1][line_obj.start : line_obj.end])
+        output.exec_preconfigured_command("s", "code -g", [line_obj])
+        contents = self.get_output()
+        self.assertIn("cla '%s'" % session_id, contents)
+        self.assertNotIn("code -g", contents)
+
     def test_exec_preconfigured_s_command_uses_configured_command_for_file(self):
         line_obj = LineObjForTest("src/output.py", original_line="src/output.py:42")
         output.exec_preconfigured_command("s", "code -g", [line_obj])
