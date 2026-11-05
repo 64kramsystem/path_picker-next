@@ -665,7 +665,9 @@ class Controller:
             return
         _min_x, min_y, _max_x, max_y = self.get_chrome_boundaries()
         did_clear_line = False
-        for index in self.dirty_indexes:
+        # Rendering a truncated match can mark that same line dirty again.
+        # Iterate a snapshot so those additions cannot prolong this redraw.
+        for index in list(self.dirty_indexes):
             y_pos = min_y + index + self.get_scroll_offset()
             if min_y <= y_pos < max_y:
                 did_clear_line = True

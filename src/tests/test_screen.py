@@ -6,8 +6,15 @@ import os
 import re
 import unittest
 from typing import Dict, List, Optional, Tuple
+from unittest.mock import patch
 
+import process_input
+from pathpicker.screen_control import Controller
+from pathpicker.screen_flags import ScreenFlags
 from tests.lib import screen_test_runner
+from tests.lib.curses_api import CursesForTest
+from tests.lib.key_bindings import KEY_BINDINGS_FOR_TEST
+from tests.lib.screen import ScreenForTest
 
 EXPECTED_DIR = "./expected/"
 
@@ -208,6 +215,39 @@ SCREEN_TEST_CASES: List[ScreenTestCase] = [
 
 
 class TestScreenLogic(unittest.TestCase):
+    def test_end_key_with_match_beyond_screen_width(self) -> None:
+        line_objs = process_input.get_line_objs_from_lines(
+            ["prefix " * 30 + "src/file.py", "last.py"],
+            validate_file_exists=False,
+        )
+        screen = ScreenForTest([], max_x=189, max_y=34)
+        controller = Controller(
+            ScreenFlags.init_from_args([]),
+            KEY_BINDINGS_FOR_TEST,
+            screen,
+            line_objs,
+            CursesForTest(),
+        )
+        controller.print_all()
+        controller.reset_dirty()
+        controller.process_input("END")
+        pending = len(controller.dirty_indexes)
+        original_clear_line = controller.clear_line
+        redraws = 0
+
+        def bounded_clear_line(y_pos: int) -> None:
+            nonlocal redraws
+            redraws += 1
+            self.assertLessEqual(
+                redraws, pending, "Rendering requeued a line in the active redraw loop"
+            )
+            original_clear_line(y_pos)
+
+        with patch.object(controller, "clear_line", side_effect=bounded_clear_line):
+            controller.process_dirty()
+        self.assertEqual(controller.hover_index, controller.num_matches - 1)
+        self.assertIn("last.py", "\n".join(screen.get_rows()))
+
     def test_screen_inputs(self) -> None:
         seen_cases: Dict[str, bool] = {}
         for test_case in SCREEN_TEST_CASES:
